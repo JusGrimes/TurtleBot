@@ -1,5 +1,7 @@
 package info.justingrimes.turtlebot;
+
 import info.justingrimes.turtlebot.chat.listeners.PingListener;
+import info.justingrimes.turtlebot.chat.listeners.TwitterListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import org.slf4j.Logger;
@@ -14,7 +16,6 @@ public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static Properties configProps;
-
 
 
     public static void main(String[] args) {
@@ -32,9 +33,26 @@ public class Main {
             logger.error("Never became ready", e);
             System.exit(1);
         }
+        addChatListeners(jda);
 
+
+    }
+
+    private static void addChatListeners(JDA jda) {
         jda.addEventListener(new PingListener());
 
+        String twitterConsumerKey = configProps.getProperty("twitter.ConsumerKey");
+        String twitterConsumerSecret = configProps.getProperty("twitter.ConsumerSecret");
+        String twitterAccessToken = configProps.getProperty("twitter.AccessToken");
+        String twitterAccessTokenSecret = configProps.getProperty("twitter.AccessTokenSecret");
+
+        jda.addEventListener(
+                new TwitterListener(
+                        twitterConsumerKey,
+                        twitterConsumerSecret,
+                        twitterAccessToken,
+                        twitterAccessTokenSecret
+                ));
 
     }
 
