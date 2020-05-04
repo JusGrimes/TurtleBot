@@ -37,11 +37,29 @@ public class TwitterListener extends ListenerAdapter {
         if (isBot || !message.isFromType(ChannelType.TEXT)) return;
         try {
             if (content.startsWith("!trump")) trumpTweet(message);
+            else if (content.startsWith("!obama")) obamaTweet(message);
         } catch (TwitterException e) {
-            log.warn("There was an error getting the tweet");
+            log.warn("Could not get tweet from message {} - {}",
+                    message.getAuthor().getName(),
+                    message.getContentDisplay());
+            log.warn(e.getMessage());
         }
 
     }
+
+    private void obamaTweet(Message message) throws TwitterException {
+        long obamaId = 813286;
+        String baseUrl = "https://twitter.com/BarackObama/status/";
+        long tweetId;
+        try {
+            tweetId = getMostRecentTweetId(obamaId);
+        } catch (TwitterException e) {
+            log.warn("Could not find trump tweet");
+            throw e;
+        }
+        sendMessage(message.getTextChannel(), baseUrl + tweetId);
+    }
+
 
     private void trumpTweet(Message message) throws TwitterException {
         long trumpId = 25073877;
