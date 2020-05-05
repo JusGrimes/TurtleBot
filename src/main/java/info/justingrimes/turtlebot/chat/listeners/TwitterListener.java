@@ -96,6 +96,7 @@ public class TwitterListener extends ListenerAdapter {
         } catch (IndexOutOfBoundsException e) {
             if (firstUser != null) {
                 log.warn("No Tweets for user: " + firstUser.getScreenName());
+                sendMessage(message.getTextChannel(), "No tweets for: " + messageContent);
             } else {
                 log.warn("No Tweets for query: " + messageContent);
             }
@@ -103,7 +104,6 @@ public class TwitterListener extends ListenerAdapter {
             log.warn("could not get tweet for: " + messageContent);
             throw e;
         }
-
 
 
     }
