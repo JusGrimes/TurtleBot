@@ -38,6 +38,7 @@ public class TwitterListener extends ListenerAdapter {
         try {
             if (content.startsWith("!trump")) trumpTweet(message);
             else if (content.startsWith("!obama")) obamaTweet(message);
+            else if (content.startsWith("!tweet ")) tweetLookup(message);
         } catch (TwitterException e) {
             log.warn("Could not get tweet from message {} - {}",
                     message.getAuthor().getName(),
@@ -72,6 +73,39 @@ public class TwitterListener extends ListenerAdapter {
             throw e;
         }
         sendMessage(message.getTextChannel(), baseUrl + tweetId);
+    }
+
+    private void tweetLookup(Message message) throws TwitterException {
+        Twitter twitter = twitterFactory.getInstance();
+        String baseUrl = "https://twitter.com";
+        long tweetId;
+        // split string into !tweet and rest section
+        String messageContent = message.getContentDisplay().split(" ", 2)[1];
+        User firstUser = null;
+        try {
+            final ResponseList<User> users = twitter.searchUsers(messageContent, 1);
+            firstUser = users.get(0);
+            tweetId = getMostRecentTweetId(firstUser.getId());
+            sendMessage(message.getTextChannel(),
+                    baseUrl +
+                            "/" +
+                            firstUser.getScreenName() +
+                            "/status/" +
+                            tweetId
+            );
+        } catch (IndexOutOfBoundsException e) {
+            if (firstUser != null) {
+                log.warn("No Tweets for user: " + firstUser.getScreenName());
+            } else {
+                log.warn("No Tweets for query: " + messageContent);
+            }
+        } catch (TwitterException e) {
+            log.warn("could not get tweet for: " + messageContent);
+            throw e;
+        }
+
+
+
     }
 
     private void sendMessage(TextChannel textChannel, String messageText) {
